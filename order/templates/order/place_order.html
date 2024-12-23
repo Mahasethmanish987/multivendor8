@@ -1,0 +1,280 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% block body %}
+<div class="main-section">
+
+    <div class="page-section">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-6">
+                    <div class="tabs-holder horizontal">
+                        <ul class="stickynav-tabs nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home"><i
+                                        class="fa fa-shopping-cart text-danger"></i>Review your billing address</a></li>
+
+                        </ul>
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane in active">
+                                <div class="menu-itam-holder">
+
+
+                                    <div id="menu-item-list-6272" class="menu-itam-list">
+                                        <div class="billing-address">
+                                            <div><b>{{order.name}}</b></div>
+                                            <div>{{order.address}}</div>
+                                            <div>{{order.state}}--{{order.country}}--{{order.pin_code}}</div>
+                                            <div><b>phone:{{order.phone}}</b></div>
+                                            <div><b>phone:{{order.phone}}</b></div>
+                                            <div><b>email:{{order.email}}</b></div>
+                                            <div><b>Payment:{{order.payment_method}}</b></div>
+                                            <br>
+                                            <div><a href="{%url 'checkout'%}" class="btn btn-outline-danger">Edit</a>
+                                            </div>
+                                        </div>
+
+
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- Your order -->
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-6">
+                    <div class="tabs-holder horizontal">
+                        <ul class="stickynav-tabs nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home"><i
+                                        class="icon- icon-room_service"></i>Your Order</a></li>
+
+                        </ul>
+                        <div class="tab-content">
+                            <!-- Home Tab Content -->
+                            <div id="home" class="tab-pane in active">
+                                <div class="menu-itam-holder">
+                                    <div id="menu-item-list-6272" class="menu-itam-list">
+
+                                        <ul>
+                                            {% for cart_item in cart_items %}
+                                            <li id="cart-item-{{cart_item.id}}">
+
+                                                <div class="image-holder"> <img src="{{cart_item.fooditem.image.url}}"
+                                                        alt=""></div>
+                                                <div class="text-holder">
+                                                    <h6>{{cart_item.fooditem}}</h6>
+
+                                                    <a href="{% url 'marketplace:vendor_detail' cart_item.fooditem.vendor.vendor_slug %}"
+                                                        class="badge badge-warning">{{cart_item.fooditem.vendor}}</a>
+                                                </div>
+                                                <div class="quantity"
+                                                    style="display:inline-block;position:absolute;top:50%; transform:translateY(-50%);margin-top:-10px">
+                                                    <span>{{cart_item.quantity}} QTY</span>
+
+                                                </div>
+                                                <div class="price-holder">
+                                                    <span class="price">£{{cart_item.fooditem.price}}</span>
+
+
+
+
+
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+
+                                            <!-- Subtotal -->
+                                            <li class="order-item">
+                                                Subtotal
+                                                <span class="price float-right">
+                                                    <span class="currency">$</span>
+                                                    <span id="subtotal">{{subtotal}}</span>
+                                                </span>
+                                            </li>
+
+                                            <!-- Tax -->
+                                            {% for key ,value in tax_dict.items %}
+                                            {% for i,j in value.items %}
+                                            <li class="order-item">
+                                                {{key}}<small>{{i}}</small>
+                                                <span class="price float-right">
+                                                    <span class="currency">$</span>
+                                                    <span id="tax-{{key}}">{{j}}</span>
+                                                </span>
+                                            </li>
+                                            {% endfor %}
+                                            {% endfor %}
+
+                                            <!-- Total -->
+                                            <li class="order-item font-weight-bold">
+                                                Total
+                                                <span class="price float-right">
+                                                    <span class="currency">$</span>
+                                                    <span id="total">{{grand_total}}</span>
+                                                </span>
+                                            </li>
+                                            {% if order.payment_method == 'paypal' %}
+                                            <div id="paypal-button-container"></div>
+                                            {% elif order.payment_method == 'esewa' %}
+                                            <form action="https://rc-epay.esewa.com.np/api/epay/main/v2/form"
+                                                method="POST" id="payment-form">
+                                                <input type="hidden" id="amount" name="amount" value="" required>
+                                                <input type="hidden" id="tax_amount" name="tax_amount" value="0"
+                                                    required>
+                                                <input type="hidden" id="total_amount" name="total_amount" value=""
+                                                    required>
+                                                <input type="hidden" id="transaction_uuid" name="transaction_uuid"
+                                                    value="241028" required>
+                                                <input type="hidden" id="product_code" name="product_code" value=""
+                                                    required>
+                                                <input type="hidden" id="product_service_charge"
+                                                    name="product_service_charge" value="0" required>
+                                                <input type="hidden" id="product_delivery_charge"
+                                                    name="product_delivery_charge" value="0" required>
+                                                <input type="hidden" id="success_url" name="success_url"
+                                                    value="http://127.0.0.1:8000/order/handle_esewa/" required>
+                                                <input type="hidden" id="failure_url" name="failure_url"
+                                                    value="http://google.com" required>
+                                                <input type="hidden" id="signed_field_names" name="signed_field_names"
+                                                    value="total_amount,transaction_uuid,product_code" required>
+                                                <input type="hidden" id="signature" name="signature" value="" required>
+                                                <button onclick="generateSignature(event)" type="submit"
+                                                    class="btn btn-success">Pay with eSewa</button>
+                                            </form>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    var url="{% url 'order:handle_paypal'%}"
+    var order_complete="{% url 'order:order_complete' %}"
+    var order_number="{{order.order_number}}"
+    function generateSignature(event) {
+        event.preventDefault()
+        const url = '{{api_url }}'
+
+        $.ajax({
+            url: url,
+            method: 'GET',
+            success: function (response) {
+
+                if (response.status === 'login_required') {
+                    alert('hlw1')
+
+                }
+                else if (response.status === 'Failed') {
+                    alert('hlw2')
+
+                }
+                else {
+
+                    document.getElementById('transaction_uuid').value = response.transaction_uuid;
+                    document.getElementById('total_amount').value = response.amount;
+                    document.getElementById('amount').value = response.amount;
+                    document.getElementById('product_code').value = response.product_code;
+                    document.getElementById('signature').value = response.signature;
+                    document.getElementById('payment-form').submit();
+
+
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            }
+
+        })
+    }
+    function getCSRFToken() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        return csrfToken;
+    }
+    paypal_order_url = "{{PAYPAL_ORDER_URL}}"
+    paypal_transaction_url = "{{PAYPAL_TRANSACTION_URL}}"
+
+    paypal.Buttons({
+        createOrder: function (data, actions) {
+            return fetch(paypal_order_url, {
+                method: 'post',
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                }
+            }).then(function (res) {
+                return res.json();
+            }).then(function (orderData) {
+                return orderData.id;
+            })
+
+        },
+        onApprove: function (data, actions) {
+            return fetch(paypal_transaction_url + data.orderID + '/capture/', {
+                method: 'post'
+            }).then(function (res) {
+                return res.json();
+            }).then(function (orderData)
+            {
+
+                var errorDetail = Array.isArray(orderData.details) && orderData.details[0];
+                if (errorDetail && errorDetail.issue === 'INSTRUMENT_DECLINED') {
+                    alert('instrumental declined')
+                    return actions.restart();
+                }
+                if (errorDetail) {
+                    var msg = 'Sorry,your transaction could not be processed';
+                    if (errorDetail.description) msg += '\n\n' + errorDetail.description;
+                    if (orderData.debug_id) msg += '(' + orderData.debug_id + ')';
+                    return alert(msg);
+                }
+                var transaction = orderData.purchase_units[0].payments.captures[0];
+
+                var transaction_id = transaction.id
+                var status = transaction.status
+                var payment_method = 'paypal'
+                sendTransaction(transaction_id,payment_method,status)
+
+
+
+
+
+
+            })
+        }
+
+
+    }).render('#paypal-button-container');
+    function sendTransaction(transaction_id, payment_method, status) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: {
+                'order_number': order_number,
+                'transaction_id': transaction_id,
+                'payment_method': payment_method,
+                'status': status,
+                'csrfmiddlewaretoken': getCSRFToken()
+            },
+            success: function (response) {
+                window.location.href=order_complete+'?order_no='+response.order_number+'&trans_id='+response.transaction_id
+            }
+
+        })
+
+    }
+</script>
+{% endblock %}
